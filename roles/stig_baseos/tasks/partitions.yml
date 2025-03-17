@@ -1,0 +1,39 @@
+---
+- name: Collect minimum required subset of facts
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - mounts
+  when: ansible_facts.mounts is not defined
+
+# RHEL-08-010030
+- name: All RHEL 8 local disk partitions must implement cryptographic mechanisms to prevent unauthorized disclosure or modification of all information that requires at rest protection
+  when: manage_230224 | bool
+  block:
+  - name: Initialize list fact
+    ansible.builtin.set_fact:
+      __encryptable_system_partitions: []
+      __unencryptable_system_partitions: [ '/boot', '/boot/efi' ]
+  - name: Populate list of system partitions
+    ansible.builtin.set_fact:
+      __encryptable_system_partitions: "{{ __encryptable_system_partitions + [ item.mount ] }}"
+    loop: "{{ ansible_facts.mounts }}"
+  - name: Filter out non-encryptable partitions from list
+    ansible.builtin.set_fact:
+      __encryptable_system_partitions: "{{ __encryptable_system_partitions | reject('equalto', item) }}"
+    loop: "{{ __unencryptable_system_partitions }}"
+    when: __unencryptable_system_partitions | length > 0
+  - name: Re-evaluate mount facts for reasons that I can't remember at the moment
+    ansible.builtin.set_fact:
+      __partitions_to_check: "{{ ansible_facts.mounts | selectattr('mount', 'in', item) | list }}"
+    loop: "{{ __encryptable_system_partitions }}"
+  - name: Check if LUKS is enabled on selected system partitions
+    ansible.builtin.assert:
+      that:
+        - "'crypto_LUKS' in item.fstype"
+    loop: "{{ __partitions_to_check }}"
+    when: __partitions_to_check | length > 0
+    ignore_errors: true
+
+
+...

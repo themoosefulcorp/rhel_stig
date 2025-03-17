@@ -1,0 +1,29 @@
+---
+# RHEL-08-010070
+- name: All RHEL 8 remote access methods must be monitored
+  when: manage_230228 | bool
+  notify: rsyslog_restart
+  block:
+  - name: Find any existing rules in config directory
+    ansible.builtin.find:
+      paths: /etc/rsyslog.d/
+      patterns: '*.conf'
+      contains: '(?i)^[#\s]*.*/var/log/secure$'
+      # excludes: "{{ custom_rsyslog_conf | default(omit) }}"
+    register: __found_rsyslog_confd_files
+  - name: Remove any rules in config directory that exist outside of custom rules file
+    ansible.builtin.lineinfile:
+      path: "{{ item.path }}"
+      regexp: '(?i)^[#\s]*(?:auth(priv)?|daemon)\.\*.*/var/log/secure$'
+      state: absent
+    loop: "{{ __found_rsyslog_confd_files.files }}"
+    when: __found_rsyslog_confd_files.matched > 0
+  - name: Add rule to main rsyslog.conf file
+    ansible.builtin.lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '(?i)^[#\s]*(?:auth(priv)?|daemon)\.\*.*/var/log/secure$'
+      line: 'auth.*;authpriv.*;daemon.* /var/log/secure'
+      state: present
+
+  
+...

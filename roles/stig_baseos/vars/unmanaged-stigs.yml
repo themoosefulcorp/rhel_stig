@@ -1,0 +1,8 @@
+---
+# RHEL 8, for certificate-based authentication, must enforce authorized access to the corresponding private key
+manage_230230: false
+# Too lazy to automate
+
+
+
+...

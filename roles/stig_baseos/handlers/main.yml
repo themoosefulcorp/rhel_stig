@@ -1,0 +1,23 @@
+---
+- name: dconf_update
+  ansible.builtin.command:
+    cmd: dconf update
+    
+- name: rsyslog_restart
+  ansible.builtin.systemd_service:
+    name: rsyslog
+    state: restarted
+
+- name: sysctl_reload
+  ansible.builtin.command:
+    cmd: sysctl --system
+
+- name: system_restart_localhost
+  ansible.builtin.debug:
+    msg: "This is where I'd put my reboot script, if I had one"
+
+- name: system_restart_remote
+  ansible.builtin.reboot:
+    msg: "Rebooting in 15 seconds"
+    pre_reboot_delay: 15
+...

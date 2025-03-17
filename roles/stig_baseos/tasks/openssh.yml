@@ -1,0 +1,55 @@
+---
+# RHEL-08-010040
+- name: RHEL 8 must display the Standard Mandatory DOD Notice and Consent Banner before granting local or remote access to the system via a ssh logon
+  block:
+  - name: Edit the "/etc/ssh/sshd_config" file to uncomment the banner keyword and configure it to point to a file that will contain the logon banner
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '(?i)^[#\s]*banner.*$'
+      line: banner /etc/issue
+      state: present
+  - name: Create the file containing the banner or replace the text in the file with the Standard Mandatory DOD Notice and Consent Banner
+    ansible.builtin.copy:
+      src: files/issue
+      dest: /etc/issue
+  notify: sshd_restart
+  when: manage_230225
+
+- name: RHEL 8 must be configured so that all network connections associated with SSH traffic terminate after becoming unresponsive
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '(?i)^[#\s]*ClientAliveCountMax.*$'
+    line: ClientAliveCountMax 1
+    state: present
+  notify: sshd_restart
+  when:
+    - manage_230244
+    - manage_244525
+
+- name: RHEL 8 must ensure the SSH server uses strong entropy
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/sshd
+    regexp: '(?i)^[#\s]*SSH_USE_STRONG_RNG=.*$'
+    line: "SSH_USE_STRONG_RNG=32"
+    state: present
+  notify: sshd_restart
+  when:
+    - manage_230253
+    - ansible_facts.ansible_distribution_version | version('8.2', '>=')
+
+- name: Deploy opensshserver.txt from template
+  block:
+  - name: Check what /etc/crypto-policies/back-ends/opensshserver.config resolves to
+    ansible.builtin.stat:
+      path: /etc/crypto-policies/back-ends/opensshserver.config
+    register: __stat_opensshserver_config
+    changed_when: false
+  - name: Deploy opensshserver.txt from template
+    ansible.builtin.template:
+      src: templates/opensshserver.txt.j2
+      dest: "{{ __stat_opensshserver_config.stat.lnk_target | default('/etc/crypto-policies/back-ends/opensshserver.config') }}"
+    notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
+  when: 
+    - manage_230251 or
+      manage_230252
+...

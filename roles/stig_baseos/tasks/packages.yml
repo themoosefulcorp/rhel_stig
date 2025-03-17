@@ -1,0 +1,99 @@
+---
+- name: RHEL 8 must have policycoreutils package installed
+  ansible.builtin.package:
+    name: policycoreutils
+    state: present
+  when: manage_230241
+
+- name: RHEL 8 must have the packages required for multifactor authentication installed
+  ansible.builtin.package:
+    name: openssl-pkcs11
+    state: present
+  when: manage_230273
+
+- name: RHEL 8 must accept Personal Identity Verification (PIV) credentials
+  ansible.builtin.package:
+    name: opensc
+    state: present
+  when: manage_230275
+
+- name: The RHEL 8 audit package must be installed
+  ansible.builtin.package:
+    name: audit
+    state: present
+  when: manage_230411
+
+- name: RHEL 8 must have the packages required for offloading audit logs installed
+  block:
+  - name: Install rsyslog package
+    ansible.builtin.package:
+      name: rsyslog
+      state: present
+  - name: Remove package that conflicts with rsyslog
+    ansible.builtin.package:
+      name: systemd-logger
+      state: absent
+  when:
+    - manage_230228 or
+      manage_230477
+
+- name: RHEL 8 must have the packages required for encrypting offloaded audit logs installed
+  ansible.builtin.package:
+    name: rsyslog-gnutls
+    state: present
+  when: manage_230478
+
+- name: A firewall must be installed on RHEL 8
+  ansible.builtin.package:
+    name: 
+      - firewalld
+      - python3-firewall
+    state: present
+  when: manage_230505
+
+- name: The RHEL 8 fapolicy module must be installed
+  ansible.builtin.package:
+    name: fapolicyd
+    state: present
+  when: manage_230523
+
+- name: RHEL 8 must have the packages required to use the hardware random number generator entropy gatherer service
+  ansible.builtin.package:
+    name: rng-tools
+    state: present
+  when: manage_244527
+
+- name: RHEL 8 must have the tmux package installed
+  ansible.builtin.package:
+    name: tmux
+    state: present
+  when: manage_244537
+  
+- name: RHEL 8 must have the USBGuard installed
+  ansible.builtin.package:
+    name: usbguard
+    state: present
+  when: manage_244547
+
+- name: All RHEL 8 networked systems must have SSH installed
+  ansible.builtin.package:
+    name: openssh
+    state: present
+  when: manage_244549
+
+- name: The RHEL 8 operating system must use a file integrity tool to verify correct operation of all security functions
+  ansible.builtin.package:
+    name: aide
+    state: present
+  when: manage_251710
+
+- name: RHEL 8 must be configured to allow sending email notifications of unauthorized configuration changes to designated personnel
+  ansible.builtin.package:
+    name: mailx
+    state: present
+  when: manage_256974
+
+- name: Update package facts
+  ansible.builtin.package_facts:
+    manager: auto
+...

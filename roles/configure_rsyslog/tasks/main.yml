@@ -1,0 +1,14 @@
+---
+- name: Install rsyslog package
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
+- name: Include configuration directory in main config file
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '(?i)^[$#\s]*include.*$'
+    line: 'include(file="/etc/rsyslog.d/*.conf" mode="optional")'
+    insertbefore: BOF
+    state: present
+...

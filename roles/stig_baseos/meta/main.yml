@@ -1,0 +1,14 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: stig_baseos
+  author: themoosefulcorp
+  description: RHEL 8 STIG configuration
+  license: "license (GPLv3)"
+  min_ansible_version:
+  platforms:
+    - name: RedHat
+      versions:
+        - 8
+...
