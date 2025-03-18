@@ -1,0 +1,6 @@
+---
+- name: Remove Cockpit message
+  ansible.builtin.file:
+    path: /etc/issue.d/cockpit.issue
+    state: absent
+...

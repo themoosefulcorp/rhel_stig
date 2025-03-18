@@ -1,0 +1,4 @@
+---
+system_crypto_policy: 'FIPS:AD-SUPPORT'
+
+...

@@ -1,0 +1,40 @@
+---
+- name: RHEL 8 vendor packaged system security patches and updates must be installed and up to date
+  ansible.builtin.package:
+    name: '*'
+    state: latest
+  notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
+  when: manage_230222
+
+- name: >
+    RHEL 8 must implement NIST FIPS-validated cryptography for the following: To provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards
+  block:
+  - name: Check to see if FIPS mode is enabled
+    ansible.builtin.command:
+      cmd: fips-mode-setup --check
+    register: __result_fips_status_check
+    changed_when: false
+  - name: Enable FIPS mode after installation (not strictly FIPS-compliant)
+    ansible.builtin.command:
+      cmd: fips-mode-setup --enable
+    when: __result_fips_status_check.stdout.find('FIPS mode is enabled.') == -1
+  - name: Check system crypto policy
+    ansible.builtin.command:
+      cmd: update-crypto-policies --show
+    register: __result_crypto_policy_check
+    changed_when: false
+  - name: Set system crypto policy
+    ansible.builtin.command:
+      cmd: >
+        update-crypto-policies --set {{ system_crypto_policy }}
+    when: "{{ system_crypto_policy }} not in __result_crypto_policy_check.stdout"
+  notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
+  when: manage_230223
+
+- name: RHEL 8 must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a command line user logon
+  ansible.builtin.copy:
+    src: files/issue
+    dest: /etc/issue
+  when: manage_230227
+
+...
