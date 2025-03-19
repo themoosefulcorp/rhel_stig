@@ -24,10 +24,18 @@
   when: manage_230411
 
 - name: RHEL 8 must have the packages required for offloading audit logs installed
-  ansible.builtin.package:
-    name: rsyslog
-    state: present
-  when: manage_230477
+  block:
+  - name: Install rsyslog package
+    ansible.builtin.package:
+      name: rsyslog
+      state: present
+  - name: Remove package that conflicts with rsyslog
+    ansible.builtin.package:
+      name: systemd-logger
+      state: absent
+  when:
+    - manage_230228 or
+      manage_230477
 
 - name: RHEL 8 must have the packages required for encrypting offloaded audit logs installed.
   ansible.builtin.package:

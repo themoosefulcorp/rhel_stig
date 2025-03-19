@@ -37,4 +37,55 @@
     dest: /etc/issue
   when: manage_230227
 
+- name: RHEL 8 must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '(?i)^[#\s]*ENCRYPT_METHOD\s+\w+$'
+    line: ENCRYPT_METHOD SHA512
+    state: present
+  when: manage_230231
+
+- name: RHEL 8 must employ FIPS 140-2 approved cryptographic hashing algorithms for all stored passwords
+  block:
+  - name: Get contents of /etc/shadow database
+    ansible.builtin.getent:
+      database: shadow
+      split: ':'
+    changed_when: false
+  - name: Lock interactive user accounts that do not have FIPS-compliant password hashes
+    ansible.builtin.user:
+      name: "{{ item.key }}"
+      password_lock: true
+    loop: "{{ ansible_facts.getent_shadow | dict2items }}"
+    when:
+      - item.value[0] != '!!'
+      - item.value[0] != '*'
+      - not item.value[0] | regex_search('^\$6\$.*$')
+  when: manage_230232
+
+- name: The RHEL 8 shadow password suite must be configured to use a sufficient number of hashing rounds
+  block:
+  - name: Remove SHA_CRYPT_MAX_ROUNDS setting
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: '(?i)^[#\s]*SHA_CRYPT_MAX_ROUNDS.*$'
+      state: absent
+  - name: Set SHA_CRYPT_MIN_ROUNDS to required value
+    ansible.builtin.lineinfile:
+      path: /etc/login.defs
+      regexp: '(?i)^[#\s]*SHA_CRYPT_MIN_ROUNDS\s+\d+$'
+      line: SHA_CRYPT_MIN_ROUNDS 100000
+      state: present
+  when: manage_230233
+
+- name: RHEL 8 operating systems booted with United Extensible Firmware Interface (UEFI) must require authentication upon booting into single-user mode and maintenance
+  block:
+  - name: Check if the system uses UEFI
+    ansible.builtin.stat:
+      path: /sys/firmware/efi
+    register: __result_sys_firmware_efi
+    changed_when: false
+  - name: Check grub user password
+    when: __result_sys_firmware_efi.stat.exists
+  when: manage_230234
 ...

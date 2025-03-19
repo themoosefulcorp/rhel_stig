@@ -1,4 +1,6 @@
 ---
 system_crypto_policy: 'FIPS:AD-SUPPORT'
 
+
+custom_rsyslog_conf: "99-stig-rsyslog"
 ...
