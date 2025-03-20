@@ -3,8 +3,7 @@
   block:
   - name: Find any existing rules in config directory
     ansible.builtin.find:
-      paths:
-        - /etc/rsyslog.d/
+      paths: /etc/rsyslog.d/
       patterns: '*.conf'
       contains: '(?i)^[#\s]*.*/var/log/secure$'
       # excludes: "{{ custom_rsyslog_conf | default(omit) }}"

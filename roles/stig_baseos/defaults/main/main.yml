@@ -1,6 +1,8 @@
 ---
 system_crypto_policy: 'FIPS:AD-SUPPORT'
 
+grub_superuser_password: "password"
 
 custom_rsyslog_conf: "99-stig-rsyslog"
+
 ...
