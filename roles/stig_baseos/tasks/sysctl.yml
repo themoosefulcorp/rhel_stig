@@ -1,0 +1,187 @@
+---
+- name: Ensure custom sysctl file exists
+  ansible.builtin.file:
+    path: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+
+
+
+
+
+- name: Get list of sysctl configuration files
+  ansible.builtin.find:
+    paths:
+      - /etc/sysctl.d/
+      - /run/sysctl.d/
+      - /usr/local/lib/sysctl.d/
+      - /usr/lib/sysctl.d/
+      - /lib/sysctl.d/
+    excludes: "{{ custom_sysctl_conf }}"
+    patterns: '*.conf'
+  register: __found_sysctl_config_files
+
+- name: fact1
+  ansible.builtin.set_fact:
+    __check_sysctl_config_files: "{{ item.path }}"
+  loop: "{{ __found_sysctl_config_files.files }}"
+
+- name: fact2
+  ansible.builtin.set_fact:
+    __check_sysctl_config_files: "{{ __check_sysctl_config_files + '/etc/sysctl.conf' }}"
+
+
+- name: RHEL 8 must prevent the loading of a new kernel for later execution
+  block:
+  - name: Find conflicting values in sysctl configuration files
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      contains: '(?i)^[;#\s]*kernel.kexec_load_disabled'
+      excludes: "{{ custom_sysctl_conf }}"
+      patterns: '*.conf'
+    register: __found_sysctl_conflict
+    changed_when: false
+  - name: Remove conflicting values from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      key: kernel.kexec_load_disabled
+      state: absent
+    loop: "{{ __found_sysctl_conflict.files }}"
+    notify: sysctl_reload
+    when: __found_sysctl_conflict.matched > 0
+  - name: Remove conflicting values from main sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      key: kernel.kexec_load_disabled
+      state: absent
+  - name: Add correct value to custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+      key: kernel.kexec_load_disabled
+      value: '1'
+      state: present
+    notify: sysctl_reload
+  when: manage_230266
+
+- name: RHEL 8 must enable kernel parameters to enforce discretionary access control on symlinks
+  block:
+  - name: Find conflicting values in sysctl configuration files
+    ansible.builtin.find:
+      paths: "{{ item.path }}"
+      contains: '(?i)^[;#\s]*fs.protected_symlinks'
+      excludes: "{{ custom_sysctl_conf }}"
+      patterns: '*.conf'
+    register: __found_sysctl_conflict
+    changed_when: false
+    loop:
+      - "{{ __found_sysctl_config_directories.files }}"
+      - /etc/sysctl.conf
+  - name: Remove conflicting values from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      key: fs.protected_symlinks
+      state: absent
+    loop: "{{ __found_sysctl_conflict.files }}"
+    notify: sysctl_reload
+  - name: Add correct value to custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+      key: fs.protected_symlinks
+      value: '1'
+      state: present
+    notify: sysctl_reload
+  when: manage_230267
+
+- name: RHEL 8 must enable kernel parameters to enforce discretionary access control on hardlinks
+  block:
+  - name: Find conflicting values in sysctl configuration files
+    ansible.builtin.find:
+      paths: "{{ item.path }}"
+      contains: '(?i)^[;#\s]*fs.protected_hardlinks'
+      excludes: "{{ custom_sysctl_conf }}"
+      patterns: '*.conf'
+    register: __found_sysctl_conflict
+    changed_when: false
+    loop:
+      - "{{ __found_sysctl_config_directories.files }}"
+      - /etc/sysctl.conf
+  - name: Remove conflicting values from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      key: fs.protected_hardlinks
+      state: absent
+    loop: "{{ __found_sysctl_conflict.files }}"
+    notify: sysctl_reload
+  - name: Add correct value to custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+      key: fs.protected_hardlinks
+      value: '1'
+      state: present
+    notify: sysctl_reload
+  when: manage_230268
+
+- name: RHEL 8 must restrict access to the kernel message buffer
+  block:
+  - name: Find conflicting values in sysctl configuration files
+    ansible.builtin.find:
+      paths: "{{ item.path }}"
+      contains: '(?i)^[;#\s]*kernel.dmesg_restrict'
+      excludes: "{{ custom_sysctl_conf }}"
+      patterns: '*.conf'
+    register: __found_sysctl_conflict
+    changed_when: false
+    loop:
+      - "{{ __found_sysctl_config_directories.files }}"
+      - /etc/sysctl.conf
+  - name: Remove conflicting values from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      key: kernel.dmesg_restrict
+      state: absent
+    loop: "{{ __found_sysctl_conflict.files }}"
+    notify: sysctl_reload
+  - name: Add correct value to custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+      key: kernel.dmesg_restrict
+      value: '1'
+      state: present
+    notify: sysctl_reload
+  when: manage_230269
+
+- name: RHEL 8 must prevent kernel profiling by unprivileged users
+  block:
+  - name: Find conflicting values in sysctl configuration files
+    ansible.builtin.find:
+      paths: "{{ item.path }}"
+      contains: '(?i)^[;#\s]*kernel.dmesg_restrict'
+      excludes: "{{ custom_sysctl_conf }}"
+      patterns: '*.conf'
+    register: __found_sysctl_conflict
+    changed_when: false
+    loop:
+      - "{{ __found_sysctl_config_directories.files }}"
+      - /etc/sysctl.conf
+  - name: Remove conflicting values from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      key: kernel.dmesg_restrict
+      state: absent
+    loop: "{{ __found_sysctl_conflict.files }}"
+    notify: sysctl_reload
+  - name: Add correct value to custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+      key: kernel.dmesg_restrict
+      value: '1'
+      state: present
+    notify: sysctl_reload
+  when: manage_230270
+...

@@ -82,12 +82,11 @@
   - name: Search for user.cfg
     ansible.builtin.find:
       paths:
-        - /boot/grub2
-        - /boot/efi/EFI/redhat
+        - /boot/grub2/
+        - /boot/efi/EFI/redhat/
       patterns: '*.cfg'
       contains: '(?i)grub\.pbkdf2\.sha512'
     register: __found_grub_user_cfg
-    changed_when: false
   - name: Generate an encrypted grub2 password if not already in use
     ansible.builtin.expect:
       command: grub2-setpassword
@@ -127,11 +126,10 @@
   block:
   - name: Find keytab files in /etc
     ansible.builtin.find:
-      paths: /etc
+      paths: /etc/
       patterns: '*.keytab'
       recurse: false
     register: __found_system_keytabs
-    changed_when: false
   - name: Remove found keytabs
     ansible.builtin.file:
       path: "{{ item.path }}"
@@ -171,7 +169,7 @@
 - name: A sticky bit must be set on all RHEL 8 public directories to prevent unauthorized and unintended information transferred via shared system resources
   block:
   - name: Find list of world-writable directories without a sticky bit set
-    # Using the find module with recursion doesn't work properly. Will have to investigate further one day.
+    # Faster to use the find command instead of the ansible module
     ansible.builtin.command:
       cmd: >
         find / -type d \( -perm -0002 -a ! -perm -1000 \) -print 2>/dev/null
@@ -268,9 +266,173 @@
     - "'crypto-policies' in ansible_facts.packages"
 
 - name: The RHEL 8 operating system must implement DoD-approved TLS encryption in the GnuTLS package
-  ansible.builtin.lineinfile:
+  ansible.builtin.replace:
     path: /etc/crypto-policies/back-ends/gnutls.config
-    
+    regexp: '\+VERS-ALL:\S*:\+'
+    replace: '+VERS-ALL:-VERS-DTLS0.9:-VERS-SSL3.0:-VERS-TLS1.0:-VERS-TLS1.1:-VERS-DTLS1.0:+'
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
   when: manage_230256
+
+- name: RHEL 8 system commands must have mode 755 or less permissive
+  block:
+  - name: Find list of system commands that are group- or world-writable
+    ansible.builtin.command:
+      cmd: >
+        find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -perm /022 -exec ls -l {} \;
+    register: __result_world_writable_commands
+    changed_when: false
+  - name: Set mode of non-compliant system commands
+    ansible.builtin.file:
+      path: "{{ item }}"
+      mode: '0755'
+    loop: "{{ __result_world_writable_commands.stdout_lines }}"
+    when: 
+      - __result_world_writable_commands is defined
+      - __result_world_writable_commands | length > 0
+  when: manage_230257
+
+- name: RHEL 8 system commands must be owned by root
+  block:
+  - name: Find list of system commands that are not owned by root
+    ansible.builtin.command:
+      cmd: >
+        find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin ! -user root -exec ls -l {} \;
+    register: __result_nonroot_owned_commands
+    changed_when: false
+  - name: Set owner of non-compliant system commands
+    ansible.builtin.file:
+      path: "{{ item }}"
+      owner: root
+    loop: "{{ __result_nonroot_owned_commands.stdout_lines }}"
+    when: 
+      - __result_nonroot_owned_commands is defined
+      - __result_nonroot_owned_commands | length > 0
+  when: manage_230258
+
+- name: RHEL 8 system commands must be group-owned by root or a system account
+  block:
+  - name: Find list of system commands that are not group-owned by root or a system account
+    ansible.builtin.command:
+      cmd: >
+        find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -gid +999 -exec ls -l {} \;
+    register: __result_nonroot_groupowned_commands
+    changed_when: false
+  - name: Set group-owner of non-compliant system commands
+    ansible.builtin.file:
+      path: "{{ item }}"
+      group: root
+    loop: "{{ __result_nonroot_groupowned_commands.stdout_lines }}"
+    when: 
+      - __result_nonroot_groupowned_commands is defined
+      - __result_nonroot_groupowned_commands | length > 0
+  when: manage_230259
+
+- name: RHEL 8 library files must have mode 755 or less permissive
+  block:
+  - name: Find list of library files that are group- or world-writable
+    ansible.builtin.command:
+      cmd: >
+        find -L /lib /lib64 /usr/lib /usr/lib64 -perm /022 -type f -exec ls -l {} \;
+    register: __result_world_writable_libfiles
+    changed_when: false
+  - name: Set mode of non-compliant library files
+    ansible.builtin.file:
+      path: "{{ item }}"
+      mode: '0755'
+    loop: "{{ __result_world_writable_libfiles.stdout_lines }}"
+    when: 
+      - __result_world_writable_libfiles is defined
+      - __result_world_writable_libfiles | length > 0
+  when: manage_230260
+
+- name: RHEL 8 library files must be owned by root
+  block:
+  - name: Find list of library files that are not owned by root
+    ansible.builtin.command:
+      cmd: >
+        find -L /lib /lib64 /usr/lib /usr/lib64 ! -user root -exec ls -l {} \;
+    register: __result_nonroot_owned_libfiles
+    changed_when: false
+  - name: Set owner of non-compliant library files
+    ansible.builtin.file:
+      path: "{{ item }}"
+      owner: root
+    loop: "{{ __result_nonroot_owned_libfiles.stdout_lines }}"
+    when: 
+      - __result_nonroot_owned_libfiles is defined
+      - __result_nonroot_owned_libfiles | length > 0
+  when: manage_230261
+
+- name: RHEL 8 library files must be group-owned by root or a system account
+  block:
+  - name: Find list of library files that are not group-owned by root or a system account
+    ansible.builtin.command:
+      cmd: >
+        find /lib /lib64 /usr/lib /usr/lib64 -gid +999 -exec ls -l {} \;
+    register: __result_nonroot_groupowned_libfiles
+    changed_when: false
+  - name: Set group-owner of non-compliant library files
+    ansible.builtin.file:
+      path: "{{ item }}"
+      group: root
+    loop: "{{ __result_nonroot_groupowned_libfiles.stdout_lines }}"
+    when: 
+      - __result_nonroot_groupowned_libfiles is defined
+      - __result_nonroot_groupowned_libfiles | length > 0
+  when: manage_230262
+
+- name: The RHEL 8 file integrity tool must notify the system administrator when changes to the baseline configuration or anomalies in the operation of any security functions are discovered within an organizationally defined frequency
+  ansible.builtin.cron:
+    name: aide-check-and-notify
+    special_time: daily
+    job: >
+      /usr/sbin/aide --check | /bin/mail -s "$HOSTNAME - Daily AIDE integrity check" {{ aide_notification_email }}
+    state: present
+  when:
+    - manage_230263
+    - "'aide' in ansible_facts.packages"
+    - "'mailx' in ansible_facts.packages"
+
+- name: RHEL 8 must prevent the installation of software, patches, service packs, device drivers, or operating system components from a repository without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization
+  block:
+  - name: Enable gpgchecks globally
+    community.general.ini_file:
+      path: /etc/dnf/dnf.conf
+      section: main
+      option: gpgcheck
+      value: '1'
+      no_extra_spaces: true
+      state: present
+  - name: Find names of non-default repos
+    ansible.builtin.command:
+      cmd: >
+        grep -HEr '^\[.+\]' -r /etc/yum.repos.d/ --exclude=redhat.repo
+    register: __result_grep_repos
+    changed_when: false
+    failed_when: __result_grep_repos.rc not in [0,1]
+  - name: Enable GPG checking for non-default repos
+    community.general.ini_file:
+      path: "{{ item[0] }}"
+      section: "{{ item[1] }}"
+      option: gpgcheck
+      value: '1'
+      no_extra_spaces: true
+      state: present
+    loop: '{{ __result_grep_repos.stdout | regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) }}'
+    when:
+      - __result_grep_repos is defined
+      - __result_grep_repos.stdout | length > 0
+  when: manage_230264
+
+- name: RHEL 8 must prevent the installation of software, patches, service packs, device drivers, or operating system components of local packages without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization
+  community.general.ini_file:
+    path: /etc/dnf/dnf.conf
+    section: main
+    option: localpkg_gpgcheck
+    value: 'True'
+    no_extra_spaces: true
+    state: present
+  when: manage_230265
+
+
 ...

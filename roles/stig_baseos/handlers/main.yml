@@ -8,6 +8,10 @@
     name: rsyslog
     state: restarted
 
+- name: sysctl_reload
+  ansible.builtin.command:
+    cmd: sysctl --system
+
 - name: system_restart_localhost
   ansible.builtin.debug:
     msg: "This is where I'd put my reboot script, if I had one"
