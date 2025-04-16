@@ -43,7 +43,7 @@
       name: kernel.kexec_load_disabled
       value: '1'
       state: present
-  when: manage_230266 | bool
+  when: stigos_manage_230266 | bool
   tags: sysctl
 
 # RHEL-08-010373
@@ -79,7 +79,7 @@
       name: fs.protected_symlinks
       value: '1'
       state: present
-  when: manage_230267 | bool
+  when: stigos_manage_230267 | bool
   tags: sysctl
 
 # RHEL-08-010374
@@ -115,7 +115,7 @@
       name: fs.protected_hardlinks
       value: '1'
       state: present
-  when: manage_230268 | bool
+  when: stigos_manage_230268 | bool
   tags: sysctl
 
 # RHEL-08-010375
@@ -151,7 +151,7 @@
       name: kernel.dmesg_restrict
       value: '1'
       state: present
-  when: manage_230269 | bool
+  when: stigos_manage_230269 | bool
   tags: sysctl
 
 # RHEL-08-010376
@@ -187,7 +187,7 @@
       name: kernel.perf_event_paranoid
       value: '2'
       state: present
-  when: manage_230270 | bool
+  when: stigos_manage_230270 | bool
   tags: sysctl
 
 # RHEL-08-010430
@@ -223,7 +223,7 @@
       name: kernel.randomize_va_space
       value: '2'
       state: present
-  when: manage_230280 | bool
+  when: stigos_manage_230280 | bool
   tags: sysctl
 
 # RHEL-08-010671
@@ -259,7 +259,7 @@
       name: kernel.core_pattern
       value: '|/bin/false'
       state: present
-  when: manage_230311 | bool
+  when: stigos_manage_230311 | bool
   tags: sysctl
 
 # RHEL-08-040210
@@ -295,7 +295,7 @@
       name: net.ipv6.conf.default.accept_redirects
       value: '0'
       state: present
-  when: manage_230535 | bool
+  when: stigos_manage_230535 | bool
   tags: sysctl
 
 # RHEL-08-040220
@@ -331,7 +331,7 @@
       name: net.ipv4.conf.all.send_redirects
       value: '0'
       state: present
-  when: manage_230536 | bool
+  when: stigos_manage_230536 | bool
   tags: sysctl
 
 # RHEL-08-040230
@@ -367,7 +367,7 @@
       name: net.ipv4.icmp_echo_ignore_broadcasts
       value: '1'
       state: present
-  when: manage_230537 | bool
+  when: stigos_manage_230537 | bool
   tags: sysctl
 
 # RHEL-08-040240
@@ -403,7 +403,7 @@
       name: net.ipv6.conf.all.accept_source_route
       value: '0'
       state: present
-  when: manage_230538 | bool
+  when: stigos_manage_230538 | bool
   tags: sysctl
 
 # RHEL-08-040250
@@ -439,7 +439,7 @@
       name: net.ipv6.conf.default.accept_source_route
       value: '0'
       state: present
-  when: manage_230539 | bool
+  when: stigos_manage_230539 | bool
   tags: sysctl
 
 # RHEL-08-040260
@@ -475,7 +475,7 @@
       name: net.ipv6.conf.all.forwarding
       value: '0'
       state: present
-  when: manage_230540 | bool
+  when: stigos_manage_230540 | bool
   tags: sysctl
 
 # RHEL-08-040261
@@ -511,7 +511,7 @@
       name: net.ipv6.conf.all.accept_ra
       value: '0'
       state: present
-  when: manage_230541 | bool
+  when: stigos_manage_230541 | bool
   tags: sysctl
 
 # RHEL-08-040262
@@ -547,7 +547,7 @@
       name: net.ipv6.conf.default.accept_ra
       value: '0'
       state: present
-  when: manage_230542 | bool
+  when: stigos_manage_230542 | bool
   tags: sysctl
 
 # RHEL-08-040270
@@ -583,7 +583,7 @@
       name: net.ipv4.conf.default.send_redirects
       value: '0'
       state: present
-  when: manage_230543 | bool
+  when: stigos_manage_230543 | bool
   tags: sysctl
 
 # RHEL-08-040280
@@ -619,7 +619,7 @@
       name: net.ipv6.conf.all.accept_redirects
       value: '0'
       state: present
-  when: manage_230544 | bool
+  when: stigos_manage_230544 | bool
   tags: sysctl
 
 # RHEL-08-040281
@@ -655,7 +655,7 @@
       name: kernel.unprivileged_bpf_disabled
       value: '1'
       state: present
-  when: manage_230545 | bool
+  when: stigos_manage_230545 | bool
   tags: sysctl
 
 # RHEL-08-040282
@@ -691,7 +691,7 @@
       name: kernel.yama.ptrace_scope
       value: '1'
       state: present
-  when: manage_230546 | bool
+  when: stigos_manage_230546 | bool
   tags: sysctl
 
 # RHEL-08-040283
@@ -727,7 +727,7 @@
       name: kernel.kptr_restrict
       value: '1'
       state: present
-  when: manage_230547 | bool
+  when: stigos_manage_230547 | bool
   tags: sysctl
 
 # RHEL-08-040284
@@ -763,7 +763,7 @@
       name: user.max_user_namespaces
       value: "{{ max_user_namespaces }}"
       state: present
-  when: manage_230548 | bool
+  when: stigos_manage_230548 | bool
   tags: sysctl
 
 # RHEL-08-040285
@@ -800,7 +800,7 @@
       # setting this to 1 will break dhcpd
       value: '2'
       state: present
-  when: manage_230549 | bool
+  when: stigos_manage_230549 | bool
   tags: sysctl
 
 # RHEL-08-040209
@@ -836,7 +836,7 @@
       name: net.ipv4.conf.default.accept_redirects
       value: '0'
       state: present
-  when: manage_244550 | bool
+  when: stigos_manage_244550 | bool
   tags: sysctl
 
 # RHEL-08-040239
@@ -872,7 +872,7 @@
       name: net.ipv4.conf.all.accept_source_route
       value: '0'
       state: present
-  when: manage_244551 | bool
+  when: stigos_manage_244551 | bool
   tags: sysctl
 
 # RHEL-08-040249
@@ -908,7 +908,7 @@
       name: net.ipv4.conf.default.accept_source_route
       value: '0'
       state: present
-  when: manage_244552 | bool
+  when: stigos_manage_244552 | bool
   tags: sysctl
 
 # RHEL-08-040279
@@ -944,7 +944,7 @@
       name: net.ipv4.conf.all.accept_redirects
       value: '0'
       state: present
-  when: manage_244553 | bool
+  when: stigos_manage_244553 | bool
   tags: sysctl
 
 # RHEL-08-040286
@@ -980,7 +980,7 @@
       name: net.core.bpf_jit_harden
       value: '2'
       state: present
-  when: manage_244554 | bool
+  when: stigos_manage_244554 | bool
   tags: sysctl
 
 # RHEL-08-040259
@@ -1016,6 +1016,6 @@
       name: net.ipv4.conf.all.forwarding
       value: '0'
       state: present
-  when: manage_250317 | bool
+  when: stigos_manage_250317 | bool
   tags: sysctl
 ...
