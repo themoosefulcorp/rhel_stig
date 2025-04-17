@@ -1,9 +1,4 @@
 ---
-- name: Install prerequisite packages for the community.crypto.luks_device module
-  ansible.builtin.package:
-    name: cryptsetup
-    state: present
-
 - name: Collect minimum required subset of facts
   ansible.builtin.setup:
     gather_subset:
@@ -26,6 +21,7 @@
   - name: Filter out non-encryptable partitions from list
     ansible.builtin.set_fact:
       __encryptable_system_partitions: "{{ __encryptable_system_partitions | reject('equalto', item) }}"
+    loop: "{{ __unencryptable_system_partitions }}"
     when: __unencryptable_system_partitions | length > 0
   - name: Re-evaluate mount facts for reasons that I can't remember at the moment
     ansible.builtin.set_fact:

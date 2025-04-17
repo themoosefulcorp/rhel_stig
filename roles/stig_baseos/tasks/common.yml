@@ -1,15 +1,42 @@
 ---
+# RHEL-08-010000
+- name: RHEL 8 must be a vendor-supported release
+  when: manage_230221 | bool
+  block:
+  - name: Collect minimum required subset of facts
+    ansible.builtin.setup:
+      gather_subset:
+        - '!all'
+        - distribution_version
+        - date_time
+    # commented to force gathering in case facts are cached
+    # when: 
+    #   - ansible_facts.distribution_version is not defined
+    #     or ansible_facts.date_time is not defined
+  - name: Define end of maintenance support date for RHEL 8.10
+    ansible.builtin.set_fact:
+      __end_support_date: "2029-05-31"
+  - name: Assert that the current date is not after the end of maintenance support date
+    ansible.builtin.assert:
+      that:
+        - "ansible_facts.distribution_version == '8.10'"
+        - "ansible_facts.date_time.date <= __end_support_date"
+      fail_msg: "Current distribution is unsupported. Please ensure DNF repos are up-to-date."
+    ignore_errors: true
+
 # RHEL-08-010010
 - name: RHEL 8 vendor packaged system security patches and updates must be installed and up to date
   ansible.builtin.package:
     name: '*'
     state: latest
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
-  when: manage_230222
+  when: manage_230222 | bool
 
 # RHEL-08-010020
 - name: >
     RHEL 8 must implement NIST FIPS-validated cryptography for the following: To provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards
+  when: manage_230223 | bool
+  notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
   block:
   - name: Check to see if FIPS mode is enabled
     ansible.builtin.command:
@@ -29,9 +56,7 @@
     ansible.builtin.command:
       cmd: update-crypto-policies --set {{ system_crypto_policy }}
     when: system_crypto_policy not in __result_crypto_policy_check.stdout
-  notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
-  when: manage_230223
-  tags: fips
+
 
 # RHEL-08-010060
 - name: RHEL 8 must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a command line user logon
@@ -41,7 +66,7 @@
     owner: root
     group: root
     mode: '0644'
-  when: manage_230227
+  when: manage_230227 | bool
 
 - name: RHEL 8 must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm
   ansible.builtin.lineinfile:
@@ -49,7 +74,7 @@
     regexp: '(?i)^[#\s]*ENCRYPT_METHOD\s+\w+$'
     line: ENCRYPT_METHOD SHA512
     state: present
-  when: manage_230231
+  when: manage_230231 | bool
 
 - name: RHEL 8 must employ FIPS 140-2 approved cryptographic hashing algorithms for all stored passwords
   block:
@@ -67,7 +92,7 @@
       - item.value[0] != '!!'
       - item.value[0] != '*'
       - not item.value[0] | regex_search('^\$6\$.*$')
-  when: manage_230232
+  when: manage_230232 | bool
 
 - name: The RHEL 8 shadow password suite must be configured to use a sufficient number of hashing rounds
   block:
@@ -82,7 +107,7 @@
       regexp: '(?i)^[#\s]*SHA_CRYPT_MIN_ROUNDS\s+\d+$'
       line: SHA_CRYPT_MIN_ROUNDS 100000
       state: present
-  when: manage_230233
+  when: manage_230233 | bool
 
 - name: RHEL 8 operating systems booted with United Extensible Firmware Interface (UEFI) or a BIOS must require authentication upon booting into single-user and maintenance modes
   block:
@@ -106,8 +131,8 @@
     when: __found_grub_user_cfg.matched == 0
   when:
     - grub_superuser_password is defined
-    - manage_230234 or
-      manage_230235
+    - manage_230234 | bool
+      or manage_230235 | bool
 
 - name: RHEL 8 operating systems must require authentication upon booting into rescue mode
   community.general.ini_file:
@@ -117,7 +142,7 @@
     value: '-/usr/lib/systemd/systemd-sulogin-shell rescue'
     no_extra_spaces: true
     state: present
-  when: manage_230236
+  when: manage_230236 | bool
 
 - name: The RHEL 8 pam_unix.so module must be configured in the password-auth file to use a FIPS 140-2 approved cryptographic hashing algorithm for system authentication
   community.general.pamd:
@@ -127,7 +152,7 @@
     module_path: pam_unix.so
     module_arguments: 'sha512'
     state: args_present
-  when: manage_230237
+  when: manage_230237 | bool
 
 - name: RHEL 8 must prevent system daemons from using Kerberos for authentication
   block:
@@ -144,7 +169,7 @@
     loop: "{{ __found_system_keytabs.files }}"
     when: __found_system_keytabs.matched > 0
   when:
-    - manage_230238
+    - manage_230238 | bool
     - "('krb5-server' in ansible_facts.packages and ansible_facts.packages['krb5-server'][0].version is version('1.17', '<')) or
       ('krb5-workstation' in ansible_facts.packages and ansible_facts.packages['krb5-workstation'][0].version is version('1.17', '<'))"
 
@@ -153,7 +178,7 @@
     name: krb5-workstation
     state: absent
   when:
-    - manage_230239
+    - manage_230239 | bool
     - "'krb5-workstation' in ansible_facts.packages"
     - ansible_facts.packages['krb5-workstation'][0].version is version('1.17', '<')
 
@@ -171,7 +196,7 @@
       line: 'SELINUX=enforcing'
       state: present
     when: "'Enforcing' not in __result_get_enforce.stdout"
-  when: manage_230240
+  when: manage_230240 | bool
 
 - name: A sticky bit must be set on all RHEL 8 public directories to prevent unauthorized and unintended information transferred via shared system resources
   block:
@@ -190,49 +215,49 @@
     when: 
       - __found_world_writable_directories is defined
       - __found_world_writable_directories | length > 0
-  when: manage_230243
+  when: manage_230243 | bool
 
 - name: The RHEL 8 /var/log/messages file must have mode 0640 or less permissive
   ansible.builtin.file:
     path: /var/log/messages
     mode: '0640'
     state: file
-  when: manage_230245
+  when: manage_230245 | bool
 
 - name: The RHEL 8 /var/log/messages file must be owned by root
   ansible.builtin.file:
     path: /var/log/messages
     owner: root
     state: file
-  when: manage_230246
+  when: manage_230246 | bool
 
 - name: The RHEL 8 /var/log/messages file must be group-owned by root
   ansible.builtin.file:
     path: /var/log/messages
     group: root
     state: file
-  when: manage_230247
+  when: manage_230247 | bool
 
 - name: The RHEL 8 /var/log directory must have mode 0755 or less permissive
   ansible.builtin.file:
     path: /var/log
     mode: '0640'
     state: directory
-  when: manage_230248
+  when: manage_230248 | bool
 
 - name: The RHEL 8 /var/log directory must be owned by root
   ansible.builtin.file:
     path: /var/log
     owner: root
     state: directory
-  when: manage_230249
+  when: manage_230249 | bool
 
 - name: The RHEL 8 /var/log directory must be group-owned by root
   ansible.builtin.file:
     path: /var/log
     group: root
     state: directory
-  when: manage_230250
+  when: manage_230250 | bool
 
 - name: The RHEL 8 operating system must implement DoD-approved encryption in the OpenSSL package
   ansible.builtin.lineinfile:
@@ -241,7 +266,7 @@
     line: '.include /etc/crypto-policies/back-ends/opensslcnf.config'
     state: present
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
-  when: manage_230254
+  when: manage_230254 | bool
 
 - name: The RHEL 8 operating system must implement DoD-approved TLS encryption in the OpenSSL package
   block:
@@ -269,7 +294,7 @@
     when: ansible_facts.packages['crypto-policies'][0].version is version('20210617', '>=')
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
   when: 
-    - manage_230255
+    - manage_230255 | bool
     - "'crypto-policies' in ansible_facts.packages"
 
 - name: The RHEL 8 operating system must implement DoD-approved TLS encryption in the GnuTLS package
@@ -278,7 +303,7 @@
     regexp: '\+VERS-ALL:\S*:\+'
     replace: '+VERS-ALL:-VERS-DTLS0.9:-VERS-SSL3.0:-VERS-TLS1.0:-VERS-TLS1.1:-VERS-DTLS1.0:+'
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
-  when: manage_230256
+  when: manage_230256 | bool
 
 - name: RHEL 8 system commands must have mode 755 or less permissive
   block:
@@ -296,7 +321,7 @@
     when: 
       - __result_world_writable_commands is defined
       - __result_world_writable_commands | length > 0
-  when: manage_230257
+  when: manage_230257 | bool
 
 - name: RHEL 8 system commands must be owned by root
   block:
@@ -314,7 +339,7 @@
     when: 
       - __result_nonroot_owned_commands is defined
       - __result_nonroot_owned_commands | length > 0
-  when: manage_230258
+  when: manage_230258 | bool
 
 - name: RHEL 8 system commands must be group-owned by root or a system account
   block:
@@ -332,7 +357,7 @@
     when: 
       - __result_nonroot_groupowned_commands is defined
       - __result_nonroot_groupowned_commands | length > 0
-  when: manage_230259
+  when: manage_230259 | bool
 
 - name: RHEL 8 library files must have mode 755 or less permissive
   block:
@@ -350,7 +375,7 @@
     when: 
       - __result_world_writable_libfiles is defined
       - __result_world_writable_libfiles | length > 0
-  when: manage_230260
+  when: manage_230260 | bool
 
 - name: RHEL 8 library files must be owned by root
   block:
@@ -368,7 +393,7 @@
     when: 
       - __result_nonroot_owned_libfiles is defined
       - __result_nonroot_owned_libfiles | length > 0
-  when: manage_230261
+  when: manage_230261 | bool
 
 - name: RHEL 8 library files must be group-owned by root or a system account
   block:
@@ -386,7 +411,7 @@
     when: 
       - __result_nonroot_groupowned_libfiles is defined
       - __result_nonroot_groupowned_libfiles | length > 0
-  when: manage_230262
+  when: manage_230262 | bool
 
 - name: The RHEL 8 file integrity tool must notify the system administrator when changes to the baseline configuration or anomalies in the operation of any security functions are discovered within an organizationally defined frequency
   ansible.builtin.cron:
@@ -396,7 +421,7 @@
       /usr/sbin/aide --check | /bin/mail -s "$HOSTNAME - Daily AIDE integrity check" {{ aide_notification_email }}
     state: present
   when:
-    - manage_230263
+    - manage_230263 | bool
     - "'aide' in ansible_facts.packages"
     - "'mailx' in ansible_facts.packages"
 
@@ -429,7 +454,7 @@
     when:
       - __result_grep_repos is defined
       - __result_grep_repos.stdout | length > 0
-  when: manage_230264
+  when: manage_230264 | bool
 
 - name: RHEL 8 must prevent the installation of software, patches, service packs, device drivers, or operating system components of local packages without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization
   community.general.ini_file:
@@ -439,7 +464,7 @@
     value: 'True'
     no_extra_spaces: true
     state: present
-  when: manage_230265
+  when: manage_230265 | bool
 
 RHEL 8 must require users to provide a password for privilege escalation
 ...
