@@ -18,11 +18,13 @@
   ansible.builtin.include_tasks:
     file: openssh.yml
   when: "'openssh' in ansible_facts.packages"
+  tags: ssh
 
 - name: Include GDM configuration tasks
   ansible.builtin.include_tasks:
     file: gdm.yml
   when: "'gdm' in ansible_facts.packages"
+  tags: gdm
 
 - name: Include common STIG implementation tasks
   ansible.builtin.include_tasks:

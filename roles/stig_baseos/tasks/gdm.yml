@@ -1,4 +1,5 @@
 ---
+# RHEL-08-010050
 - name: RHEL 8 must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a graphical user logon
   community.general.ini_file:
     path: /etc/dconf/db/local.d/01-banner-message

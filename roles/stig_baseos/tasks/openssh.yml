@@ -1,4 +1,5 @@
 ---
+# RHEL-08-010040
 - name: RHEL 8 must display the Standard Mandatory DOD Notice and Consent Banner before granting local or remote access to the system via a ssh logon
   block:
   - name: Edit the "/etc/ssh/sshd_config" file to uncomment the banner keyword and configure it to point to a file that will contain the logon banner

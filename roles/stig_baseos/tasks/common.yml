@@ -1,4 +1,5 @@
 ---
+# RHEL-08-010010
 - name: RHEL 8 vendor packaged system security patches and updates must be installed and up to date
   ansible.builtin.package:
     name: '*'
@@ -6,6 +7,7 @@
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
   when: manage_230222
 
+# RHEL-08-010020
 - name: >
     RHEL 8 must implement NIST FIPS-validated cryptography for the following: To provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards
   block:
@@ -29,11 +31,16 @@
     when: system_crypto_policy not in __result_crypto_policy_check.stdout
   notify: system_restart_{%- if inventory_hostname == 'localhost' -%} localhost {%- else -%} remote {% endif %}
   when: manage_230223
+  tags: fips
 
+# RHEL-08-010060
 - name: RHEL 8 must display the Standard Mandatory DoD Notice and Consent Banner before granting local or remote access to the system via a command line user logon
   ansible.builtin.copy:
     src: files/issue
     dest: /etc/issue
+    owner: root
+    group: root
+    mode: '0644'
   when: manage_230227
 
 - name: RHEL 8 must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm

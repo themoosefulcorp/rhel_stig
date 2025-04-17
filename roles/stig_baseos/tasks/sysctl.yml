@@ -8,10 +8,10 @@
     modification_time: preserve
     access_time: preserve
     state: touch
-  tags: sysctl
 
 # RHEL-08-010372
 - name: RHEL 8 must prevent the loading of a new kernel for later execution
+  when: manage_230266 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.kexec_load_disabled configured
     ansible.builtin.find:
@@ -43,11 +43,10 @@
       name: kernel.kexec_load_disabled
       value: '1'
       state: present
-  when: stigos_manage_230266 | bool
-  tags: sysctl
 
 # RHEL-08-010373
 - name: RHEL 8 must enable kernel parameters to enforce discretionary access control on symlinks
+  when: manage_230267 | bool
   block:
   - name: Get list of sysctl configuration files with fs.protected_symlinks configured
     ansible.builtin.find:
@@ -79,11 +78,10 @@
       name: fs.protected_symlinks
       value: '1'
       state: present
-  when: stigos_manage_230267 | bool
-  tags: sysctl
 
 # RHEL-08-010374
 - name: RHEL 8 must enable kernel parameters to enforce discretionary access control on hardlinks
+  when: manage_230268 | bool
   block:
   - name: Get list of sysctl configuration files with fs.protected_hardlinks configured
     ansible.builtin.find:
@@ -115,11 +113,10 @@
       name: fs.protected_hardlinks
       value: '1'
       state: present
-  when: stigos_manage_230268 | bool
-  tags: sysctl
 
 # RHEL-08-010375
 - name: RHEL 8 must restrict access to the kernel message buffer
+  when: manage_230269 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.dmesg_restrict configured
     ansible.builtin.find:
@@ -151,11 +148,10 @@
       name: kernel.dmesg_restrict
       value: '1'
       state: present
-  when: stigos_manage_230269 | bool
-  tags: sysctl
 
 # RHEL-08-010376
 - name: RHEL 8 must prevent kernel profiling by unprivileged users
+  when: manage_230270 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.perf_event_paranoid configured
     ansible.builtin.find:
@@ -187,11 +183,10 @@
       name: kernel.perf_event_paranoid
       value: '2'
       state: present
-  when: stigos_manage_230270 | bool
-  tags: sysctl
 
 # RHEL-08-010430
 - name: RHEL 8 must implement address space layout randomization (ASLR) to protect its memory from unauthorized code execution
+  when: manage_230280 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.randomize_va_space configured
     ansible.builtin.find:
@@ -223,11 +218,10 @@
       name: kernel.randomize_va_space
       value: '2'
       state: present
-  when: stigos_manage_230280 | bool
-  tags: sysctl
 
 # RHEL-08-010671
 - name: RHEL 8 must disable the kernel.core_pattern
+  when: manage_230311 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.core_pattern configured
     ansible.builtin.find:
@@ -259,11 +253,10 @@
       name: kernel.core_pattern
       value: '|/bin/false'
       state: present
-  when: stigos_manage_230311 | bool
-  tags: sysctl
 
 # RHEL-08-040210
 - name: RHEL 8 must prevent IPv6 Internet Control Message Protocol (ICMP) redirect messages from being accepted
+  when: manage_230535 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_redirects configured
     ansible.builtin.find:
@@ -295,11 +288,10 @@
       name: net.ipv6.conf.default.accept_redirects
       value: '0'
       state: present
-  when: stigos_manage_230535 | bool
-  tags: sysctl
 
 # RHEL-08-040220
 - name: RHEL 8 must not send Internet Control Message Protocol (ICMP) redirects
+  when: manage_230536 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.all.send_redirects configured
     ansible.builtin.find:
@@ -331,11 +323,10 @@
       name: net.ipv4.conf.all.send_redirects
       value: '0'
       state: present
-  when: stigos_manage_230536 | bool
-  tags: sysctl
 
 # RHEL-08-040230
 - name: RHEL 8 must not respond to Internet Control Message Protocol (ICMP) echoes sent to a broadcast address
+  when: manage_230537 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.icmp_echo_ignore_broadcasts configured
     ansible.builtin.find:
@@ -367,11 +358,10 @@
       name: net.ipv4.icmp_echo_ignore_broadcasts
       value: '1'
       state: present
-  when: stigos_manage_230537 | bool
-  tags: sysctl
 
 # RHEL-08-040240
 - name: RHEL 8 must not forward IPv6 source-routed packets
+  when: manage_230538 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_source_route configured
     ansible.builtin.find:
@@ -403,11 +393,10 @@
       name: net.ipv6.conf.all.accept_source_route
       value: '0'
       state: present
-  when: stigos_manage_230538 | bool
-  tags: sysctl
 
 # RHEL-08-040250
 - name: RHEL 8 must not forward IPv6 source-routed packets by default
+  when: manage_230539 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_source_route configured
     ansible.builtin.find:
@@ -439,11 +428,10 @@
       name: net.ipv6.conf.default.accept_source_route
       value: '0'
       state: present
-  when: stigos_manage_230539 | bool
-  tags: sysctl
 
 # RHEL-08-040260
 - name: RHEL 8 must not enable IPv6 packet forwarding unless the system is a router
+  when: manage_230540 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.all.forwarding configured
     ansible.builtin.find:
@@ -475,11 +463,10 @@
       name: net.ipv6.conf.all.forwarding
       value: '0'
       state: present
-  when: stigos_manage_230540 | bool
-  tags: sysctl
 
 # RHEL-08-040261
 - name: RHEL 8 must not accept router advertisements on all IPv6 interfaces
+  when: manage_230541 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_ra configured
     ansible.builtin.find:
@@ -511,11 +498,10 @@
       name: net.ipv6.conf.all.accept_ra
       value: '0'
       state: present
-  when: stigos_manage_230541 | bool
-  tags: sysctl
 
 # RHEL-08-040262
 - name: RHEL 8 must not accept router advertisements on all IPv6 interfaces by default
+  when: manage_230542 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_ra configured
     ansible.builtin.find:
@@ -547,11 +533,10 @@
       name: net.ipv6.conf.default.accept_ra
       value: '0'
       state: present
-  when: stigos_manage_230542 | bool
-  tags: sysctl
 
 # RHEL-08-040270
 - name: RHEL 8 must not allow interfaces to perform Internet Control Message Protocol (ICMP) redirects by default
+  when: manage_230543 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.default.send_redirects configured
     ansible.builtin.find:
@@ -583,11 +568,10 @@
       name: net.ipv4.conf.default.send_redirects
       value: '0'
       state: present
-  when: stigos_manage_230543 | bool
-  tags: sysctl
 
 # RHEL-08-040280
 - name: RHEL 8 must ignore IPv6 Internet Control Message Protocol (ICMP) redirect messages
+  when: manage_230544 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_redirects configured
     ansible.builtin.find:
@@ -619,11 +603,10 @@
       name: net.ipv6.conf.all.accept_redirects
       value: '0'
       state: present
-  when: stigos_manage_230544 | bool
-  tags: sysctl
 
 # RHEL-08-040281
 - name: RHEL 8 must disable access to network bpf syscall from unprivileged processes
+  when: manage_230545 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.unprivileged_bpf_disabled configured
     ansible.builtin.find:
@@ -655,11 +638,10 @@
       name: kernel.unprivileged_bpf_disabled
       value: '1'
       state: present
-  when: stigos_manage_230545 | bool
-  tags: sysctl
 
 # RHEL-08-040282
 - name: RHEL 8 must restrict usage of ptrace to descendant processes
+  when: manage_230546 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.yama.ptrace_scope configured
     ansible.builtin.find:
@@ -691,11 +673,10 @@
       name: kernel.yama.ptrace_scope
       value: '1'
       state: present
-  when: stigos_manage_230546 | bool
-  tags: sysctl
 
 # RHEL-08-040283
 - name: RHEL 8 must restrict exposed kernel pointer addresses access
+  when: manage_230547 | bool
   block:
   - name: Get list of sysctl configuration files with kernel.kptr_restrict configured
     ansible.builtin.find:
@@ -727,11 +708,10 @@
       name: kernel.kptr_restrict
       value: '1'
       state: present
-  when: stigos_manage_230547 | bool
-  tags: sysctl
 
 # RHEL-08-040284
 - name: RHEL 8 must disable the use of user namespaces
+  when: manage_230548 | bool
   block:
   - name: Get list of sysctl configuration files with user.max_user_namespaces configured
     ansible.builtin.find:
@@ -763,12 +743,11 @@
       name: user.max_user_namespaces
       value: "{{ max_user_namespaces }}"
       state: present
-  when: stigos_manage_230548 | bool
-  tags: sysctl
 
 # RHEL-08-040285
 - name: RHEL 8 must use reverse path filtering on all IPv4 interfaces
   block:
+  when: manage_230549 | bool
   - name: Get list of sysctl configuration files with net.ipv4.conf.all.rp_filter configured
     ansible.builtin.find:
       paths:
@@ -800,11 +779,10 @@
       # setting this to 1 will break dhcpd
       value: '2'
       state: present
-  when: stigos_manage_230549 | bool
-  tags: sysctl
 
 # RHEL-08-040209
 - name: RHEL 8 must prevent IPv4 Internet Control Message Protocol (ICMP) redirect messages from being accepted
+  when: manage_244550 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.default.accept_redirects configured
     ansible.builtin.find:
@@ -836,11 +814,10 @@
       name: net.ipv4.conf.default.accept_redirects
       value: '0'
       state: present
-  when: stigos_manage_244550 | bool
-  tags: sysctl
 
 # RHEL-08-040239
 - name: RHEL 8 must not forward IPv4 source-routed packets
+  when: manage_244551 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.all.accept_source_route configured
     ansible.builtin.find:
@@ -872,11 +849,10 @@
       name: net.ipv4.conf.all.accept_source_route
       value: '0'
       state: present
-  when: stigos_manage_244551 | bool
-  tags: sysctl
 
 # RHEL-08-040249
 - name: RHEL 8 must not forward IPv4 source-routed packets by default
+  when: manage_244552 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.default.accept_source_route configured
     ansible.builtin.find:
@@ -908,11 +884,10 @@
       name: net.ipv4.conf.default.accept_source_route
       value: '0'
       state: present
-  when: stigos_manage_244552 | bool
-  tags: sysctl
 
 # RHEL-08-040279
 - name: RHEL 8 must ignore IPv4 Internet Control Message Protocol (ICMP) redirect messages
+  when: manage_244553 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.all.accept_redirects configured
     ansible.builtin.find:
@@ -944,11 +919,10 @@
       name: net.ipv4.conf.all.accept_redirects
       value: '0'
       state: present
-  when: stigos_manage_244553 | bool
-  tags: sysctl
 
 # RHEL-08-040286
 - name: RHEL 8 must enable hardening for the Berkeley Packet Filter Just-in-time compiler
+  when: manage_244554 | bool
   block:
   - name: Get list of sysctl configuration files with net.core.bpf_jit_harden configured
     ansible.builtin.find:
@@ -980,11 +954,10 @@
       name: net.core.bpf_jit_harden
       value: '2'
       state: present
-  when: stigos_manage_244554 | bool
-  tags: sysctl
 
 # RHEL-08-040259
 - name: RHEL 8 must not enable IPv4 packet forwarding unless the system is a router
+  when: manage_250317 | bool
   block:
   - name: Get list of sysctl configuration files with net.ipv4.conf.all.forwarding configured
     ansible.builtin.find:
@@ -1016,6 +989,4 @@
       name: net.ipv4.conf.all.forwarding
       value: '0'
       state: present
-  when: stigos_manage_250317 | bool
-  tags: sysctl
 ...

@@ -1,5 +1,8 @@
 ---
+# RHEL-08-010070
 - name: All RHEL 8 remote access methods must be monitored
+  when: manage_230228 | bool
+  notify: rsyslog_restart
   block:
   - name: Find any existing rules in config directory
     ansible.builtin.find:
@@ -21,6 +24,6 @@
       regexp: '(?i)^[#\s]*(?:auth(priv)?|daemon)\.\*.*/var/log/secure$'
       line: 'auth.*;authpriv.*;daemon.* /var/log/secure'
       state: present
-  notify: rsyslog_restart
-  when: manage_230228
+
+  
 ...
