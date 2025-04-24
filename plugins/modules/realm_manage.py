@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, annotations, division, print_function
 __metaclass__ = type
@@ -16,6 +16,7 @@ description:
     - For configuring realm ACLs using V(permit) and V(deny), please see M(realm_acl).
 author:
     - Christopher Harcourt (@themoosefulcorp)
+version_added: "2.16.3"
 options:
     action:
         aliases: [ state ]
@@ -28,11 +29,6 @@ options:
         type: str
         required: true
         choices: [ discover, list, join, leave ]
-    auto_id_mapping:
-        description:
-            -
-        type: bool
-        default: true
     client_software:
         description:
             - Which client software the realm uses.
@@ -41,29 +37,37 @@ options:
         choices: [ sssd, winbind ]
     computer_name:
         description:
-            -
+            - What name to use when creating the computer account.
+            - Requires a string of 15 or fewer characters that is a valid NetBIOS name.
+            - Used when O(server_software=active-directory).
         type: str
     computer_ou:
         description:
-            -
+            - The distinguished name of the OU in which to create the computer account.
+            - Typically, you can omit the root DSE portion.
+            - Used when O(server_software=active-directory).
         type: str
     discover_all:
         description:
+            - TODO replace with show_all
             - Whether or not C(realm discover) should show all discovered realms.
             - Requires O(action=discover).
         type: bool
     discover_name:
         description:
+            - TODO replace with name_only
             - Whether or not C(realm discover) should return only the names of the discovered realms.
             - Requires O(action=discover).
         type: bool
     list_all:
         description:
+            - TODO replace with show_all
             - Whether or not C(realm list) should show all discovered realms.
             - Requires O(action=list).
         type: bool
     list_name:
         description:
+            - TODO replace with name_only
             - Whether or not C(realm list) should return only the names of the discovered realms.
             - Requires O(action=list).
         type: bool
@@ -73,13 +77,22 @@ options:
             - If O(action=discover), C(realm) will only return realms using the specified server software.
         type: str
         choices: [ adcli, samba ]
+    name_only:
+        description:
+            - Placeholder
+        type: bool
     no_password:
         description:
-            -
+            - Used with O(action=join).
+            - Attempt to perform the C(realm join) without a password.
+            - Mutually exclusive with O(one_time_password) and O(password).
         type: bool
     one_time_password:
         description:
-            -
+            - Used with O(action=join).
+            - Perform C(realm join) with a one-time password.
+            - Not possible with all types of realms.
+            - Mutually exclusive with O(no_password) and O(password).
         type: str
     os_name:
         description:
@@ -89,12 +102,21 @@ options:
         description:
             -
         type: str
+    password:
+        description:
+            - Plain-text password of the supplied domain account.
+            - Mutually exclusive with O(one_time_password) and O(no_password).
+        type: str
     server_software:
         description:
             - Which server software the realm uses.
             - If O(action=discover), C(realm) will only return realms using the specified server software.
         type: str
         choices: [ active-directory, ipa ]
+    show_all:
+        description:
+            - Placeholder
+        type: bool
     use_ldaps:
         description:
             - Whether or not C(realm) should force a connection over LDAPS when connecting to AD.
