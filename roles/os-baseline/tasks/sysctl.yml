@@ -1,0 +1,992 @@
+---
+- name: Create custom sysctl file if needed
+  ansible.builtin.file:
+    path: "/etc/sysctl.d/{{ custom_sysctl_conf }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+    modification_time: preserve
+    access_time: preserve
+    state: touch
+
+# RHEL-08-010372
+- name: RHEL 8 must prevent the loading of a new kernel for later execution
+  when: manage_230266 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.kexec_load_disabled configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.kexec_load_disabled'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.kexec_load_disabled keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.kexec_load_disabled
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.kexec_load_disabled keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.kexec_load_disabled
+      state: absent  
+  - name: Configure kernel.kexec_load_disabled in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.kexec_load_disabled
+      value: '1'
+      state: present
+
+# RHEL-08-010373
+- name: RHEL 8 must enable kernel parameters to enforce discretionary access control on symlinks
+  when: manage_230267 | bool
+  block:
+  - name: Get list of sysctl configuration files with fs.protected_symlinks configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'fs\.protected_symlinks'
+    register: __found_sysctld_config
+  - name: Remove conflicting fs.protected_symlinks keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: fs.protected_symlinks
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting fs.protected_symlinks keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: fs.protected_symlinks
+      state: absent  
+  - name: Configure fs.protected_symlinks in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: fs.protected_symlinks
+      value: '1'
+      state: present
+
+# RHEL-08-010374
+- name: RHEL 8 must enable kernel parameters to enforce discretionary access control on hardlinks
+  when: manage_230268 | bool
+  block:
+  - name: Get list of sysctl configuration files with fs.protected_hardlinks configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'fs\.protected_hardlinks'
+    register: __found_sysctld_config
+  - name: Remove conflicting fs.protected_hardlinks keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: fs.protected_hardlinks
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting fs.protected_hardlinks keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: fs.protected_hardlinks
+      state: absent  
+  - name: Configure fs.protected_hardlinks in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: fs.protected_hardlinks
+      value: '1'
+      state: present
+
+# RHEL-08-010375
+- name: RHEL 8 must restrict access to the kernel message buffer
+  when: manage_230269 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.dmesg_restrict configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.dmesg_restrict'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.dmesg_restrict keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.dmesg_restrict
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.dmesg_restrict keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.dmesg_restrict
+      state: absent  
+  - name: Configure kernel.dmesg_restrict in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.dmesg_restrict
+      value: '1'
+      state: present
+
+# RHEL-08-010376
+- name: RHEL 8 must prevent kernel profiling by unprivileged users
+  when: manage_230270 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.perf_event_paranoid configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.perf_event_paranoid'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.perf_event_paranoid keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.perf_event_paranoid
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.perf_event_paranoid keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.perf_event_paranoid
+      state: absent  
+  - name: Configure kernel.perf_event_paranoid in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.perf_event_paranoid
+      value: '2'
+      state: present
+
+# RHEL-08-010430
+- name: RHEL 8 must implement address space layout randomization (ASLR) to protect its memory from unauthorized code execution
+  when: manage_230280 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.randomize_va_space configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.randomize_va_space'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.randomize_va_space keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.randomize_va_space
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.randomize_va_space keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.randomize_va_space
+      state: absent  
+  - name: Configure kernel.randomize_va_space in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.randomize_va_space
+      value: '2'
+      state: present
+
+# RHEL-08-010671
+- name: RHEL 8 must disable the kernel.core_pattern
+  when: manage_230311 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.core_pattern configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.core_pattern'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.core_pattern keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.core_pattern
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.core_pattern keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.core_pattern
+      state: absent  
+  - name: Configure kernel.core_pattern in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.core_pattern
+      value: '|/bin/false'
+      state: present
+
+# RHEL-08-040210
+- name: RHEL 8 must prevent IPv6 Internet Control Message Protocol (ICMP) redirect messages from being accepted
+  when: manage_230535 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.default\.accept_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.default.accept_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.default.accept_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.default.accept_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.default.accept_redirects
+      state: absent  
+  - name: Configure net.ipv6.conf.default.accept_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.default.accept_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040220
+- name: RHEL 8 must not send Internet Control Message Protocol (ICMP) redirects
+  when: manage_230536 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.all.send_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.all\.send_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.all.send_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.all.send_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.all.send_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.all.send_redirects
+      state: absent  
+  - name: Configure net.ipv4.conf.all.send_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.all.send_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040230
+- name: RHEL 8 must not respond to Internet Control Message Protocol (ICMP) echoes sent to a broadcast address
+  when: manage_230537 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.icmp_echo_ignore_broadcasts configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.icmp_echo_ignore_broadcasts'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.icmp_echo_ignore_broadcasts keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.icmp_echo_ignore_broadcasts
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.icmp_echo_ignore_broadcasts keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.icmp_echo_ignore_broadcasts
+      state: absent  
+  - name: Configure net.ipv4.icmp_echo_ignore_broadcasts in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.icmp_echo_ignore_broadcasts
+      value: '1'
+      state: present
+
+# RHEL-08-040240
+- name: RHEL 8 must not forward IPv6 source-routed packets
+  when: manage_230538 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_source_route configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.all\.accept_source_route'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.all.accept_source_route keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.all.accept_source_route
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.all.accept_source_route keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.all.accept_source_route
+      state: absent  
+  - name: Configure net.ipv6.conf.all.accept_source_route in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.all.accept_source_route
+      value: '0'
+      state: present
+
+# RHEL-08-040250
+- name: RHEL 8 must not forward IPv6 source-routed packets by default
+  when: manage_230539 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_source_route configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.default\.accept_source_route'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.default.accept_source_route keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.default.accept_source_route
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.default.accept_source_route keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.default.accept_source_route
+      state: absent  
+  - name: Configure net.ipv6.conf.default.accept_source_route in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.default.accept_source_route
+      value: '0'
+      state: present
+
+# RHEL-08-040260
+- name: RHEL 8 must not enable IPv6 packet forwarding unless the system is a router
+  when: manage_230540 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.all.forwarding configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.all\.forwarding'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.all.forwarding keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.all.forwarding
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.all.forwarding keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.all.forwarding
+      state: absent  
+  - name: Configure net.ipv6.conf.all.forwarding in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.all.forwarding
+      value: '0'
+      state: present
+
+# RHEL-08-040261
+- name: RHEL 8 must not accept router advertisements on all IPv6 interfaces
+  when: manage_230541 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_ra configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.all\.accept_ra'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.all.accept_ra keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.all.accept_ra
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.all.accept_ra keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.all.accept_ra
+      state: absent  
+  - name: Configure net.ipv6.conf.all.accept_ra in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.all.accept_ra
+      value: '0'
+      state: present
+
+# RHEL-08-040262
+- name: RHEL 8 must not accept router advertisements on all IPv6 interfaces by default
+  when: manage_230542 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.default.accept_ra configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.default\.accept_ra'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.default.accept_ra keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.default.accept_ra
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.default.accept_ra keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.default.accept_ra
+      state: absent  
+  - name: Configure net.ipv6.conf.default.accept_ra in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.default.accept_ra
+      value: '0'
+      state: present
+
+# RHEL-08-040270
+- name: RHEL 8 must not allow interfaces to perform Internet Control Message Protocol (ICMP) redirects by default
+  when: manage_230543 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.default.send_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.default\.send_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.default.send_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.default.send_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.default.send_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.default.send_redirects
+      state: absent  
+  - name: Configure net.ipv4.conf.default.send_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.default.send_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040280
+- name: RHEL 8 must ignore IPv6 Internet Control Message Protocol (ICMP) redirect messages
+  when: manage_230544 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv6.conf.all.accept_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv6\.conf\.all\.accept_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv6.conf.all.accept_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv6.conf.all.accept_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv6.conf.all.accept_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv6.conf.all.accept_redirects
+      state: absent  
+  - name: Configure net.ipv6.conf.all.accept_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv6.conf.all.accept_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040281
+- name: RHEL 8 must disable access to network bpf syscall from unprivileged processes
+  when: manage_230545 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.unprivileged_bpf_disabled configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.unprivileged_bpf_disabled'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.unprivileged_bpf_disabled keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.unprivileged_bpf_disabled
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.unprivileged_bpf_disabled keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.unprivileged_bpf_disabled
+      state: absent  
+  - name: Configure kernel.unprivileged_bpf_disabled in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.unprivileged_bpf_disabled
+      value: '1'
+      state: present
+
+# RHEL-08-040282
+- name: RHEL 8 must restrict usage of ptrace to descendant processes
+  when: manage_230546 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.yama.ptrace_scope configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.yama\.ptrace_scope'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.yama.ptrace_scope keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.yama.ptrace_scope
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.yama.ptrace_scope keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.yama.ptrace_scope
+      state: absent  
+  - name: Configure kernel.yama.ptrace_scope in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.yama.ptrace_scope
+      value: '1'
+      state: present
+
+# RHEL-08-040283
+- name: RHEL 8 must restrict exposed kernel pointer addresses access
+  when: manage_230547 | bool
+  block:
+  - name: Get list of sysctl configuration files with kernel.kptr_restrict configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'kernel\.kptr_restrict'
+    register: __found_sysctld_config
+  - name: Remove conflicting kernel.kptr_restrict keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: kernel.kptr_restrict
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting kernel.kptr_restrict keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: kernel.kptr_restrict
+      state: absent  
+  - name: Configure kernel.kptr_restrict in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: kernel.kptr_restrict
+      value: '1'
+      state: present
+
+# RHEL-08-040284
+- name: RHEL 8 must disable the use of user namespaces
+  when: manage_230548 | bool
+  block:
+  - name: Get list of sysctl configuration files with user.max_user_namespaces configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'user\.max_user_namespaces'
+    register: __found_sysctld_config
+  - name: Remove conflicting user.max_user_namespaces keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: user.max_user_namespaces
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting user.max_user_namespaces keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: user.max_user_namespaces
+      state: absent  
+  - name: Configure user.max_user_namespaces in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: user.max_user_namespaces
+      value: "{{ max_user_namespaces }}"
+      state: present
+
+# RHEL-08-040285
+- name: RHEL 8 must use reverse path filtering on all IPv4 interfaces
+  block:
+  when: manage_230549 | bool
+  - name: Get list of sysctl configuration files with net.ipv4.conf.all.rp_filter configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.all\.rp_filter'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.all.rp_filter keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.all.rp_filter
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.all.rp_filter keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.all.rp_filter
+      state: absent  
+  - name: Configure net.ipv4.conf.all.rp_filter in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.all.rp_filter
+      # setting this to 1 will break dhcpd
+      value: '2'
+      state: present
+
+# RHEL-08-040209
+- name: RHEL 8 must prevent IPv4 Internet Control Message Protocol (ICMP) redirect messages from being accepted
+  when: manage_244550 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.default.accept_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.default\.accept_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.default.accept_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.default.accept_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.default.accept_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.default.accept_redirects
+      state: absent  
+  - name: Configure net.ipv4.conf.default.accept_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.default.accept_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040239
+- name: RHEL 8 must not forward IPv4 source-routed packets
+  when: manage_244551 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.all.accept_source_route configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.all\.accept_source_route'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.all.accept_source_route keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.all.accept_source_route
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.all.accept_source_route keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.all.accept_source_route
+      state: absent  
+  - name: Configure net.ipv4.conf.all.accept_source_route in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.all.accept_source_route
+      value: '0'
+      state: present
+
+# RHEL-08-040249
+- name: RHEL 8 must not forward IPv4 source-routed packets by default
+  when: manage_244552 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.default.accept_source_route configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.default\.accept_source_route'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.default.accept_source_route keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.default.accept_source_route
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.default.accept_source_route keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.default.accept_source_route
+      state: absent  
+  - name: Configure net.ipv4.conf.default.accept_source_route in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.default.accept_source_route
+      value: '0'
+      state: present
+
+# RHEL-08-040279
+- name: RHEL 8 must ignore IPv4 Internet Control Message Protocol (ICMP) redirect messages
+  when: manage_244553 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.all.accept_redirects configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.all\.accept_redirects'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.all.accept_redirects keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.all.accept_redirects
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.all.accept_redirects keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.all.accept_redirects
+      state: absent  
+  - name: Configure net.ipv4.conf.all.accept_redirects in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.all.accept_redirects
+      value: '0'
+      state: present
+
+# RHEL-08-040286
+- name: RHEL 8 must enable hardening for the Berkeley Packet Filter Just-in-time compiler
+  when: manage_244554 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.core.bpf_jit_harden configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.core\.bpf_jit_harden'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.core.bpf_jit_harden keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.core.bpf_jit_harden
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.core.bpf_jit_harden keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.core.bpf_jit_harden
+      state: absent  
+  - name: Configure net.core.bpf_jit_harden in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.core.bpf_jit_harden
+      value: '2'
+      state: present
+
+# RHEL-08-040259
+- name: RHEL 8 must not enable IPv4 packet forwarding unless the system is a router
+  when: manage_250317 | bool
+  block:
+  - name: Get list of sysctl configuration files with net.ipv4.conf.all.forwarding configured
+    ansible.builtin.find:
+      paths:
+        - /etc/sysctl.d/
+        - /run/sysctl.d/
+        - /usr/local/lib/sysctl.d/
+        - /usr/lib/sysctl.d/
+        - /lib/sysctl.d/
+      patterns: '*.conf'
+      excludes: "{{ custom_sysctl_conf }}*"
+      contains: 'net\.ipv4\.conf\.all\.forwarding'
+    register: __found_sysctld_config
+  - name: Remove conflicting net.ipv4.conf.all.forwarding keys from sysctl configuration files
+    ansible.posix.sysctl:
+      sysctl_file: "{{ item.path }}"
+      name: net.ipv4.conf.all.forwarding
+      state: absent
+    loop: "{{ __found_sysctld_config.files }}"
+    when: __found_sysctld_config.matched > 0
+  - name: Remove conflicting net.ipv4.conf.all.forwarding keys from main sysctl.conf file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.conf
+      name: net.ipv4.conf.all.forwarding
+      state: absent  
+  - name: Configure net.ipv4.conf.all.forwarding in custom sysctl configuration file
+    ansible.posix.sysctl:
+      sysctl_file: /etc/sysctl.d/{{ custom_sysctl_conf }}.conf
+      name: net.ipv4.conf.all.forwarding
+      value: '0'
+      state: present
+...

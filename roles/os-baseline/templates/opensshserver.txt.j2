@@ -1,0 +1,4 @@
+CRYPTO_POLICY='
+{%- if manage_230251 -%} -oMACs=hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256 {% end if -%}
+{%- if manage_230252 -%} -oCiphers=aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes128-ctr {% end if -%}
+'

@@ -1,0 +1,12 @@
+---
+system_crypto_policy: 'FIPS:AD-SUPPORT'
+
+grub_superuser_password: "password"
+
+custom_rsyslog_conf: "99-stig-rsyslog"
+custom_sysctl_conf: "99-stig-sysctl"
+
+aide_notification_email: "root@fake.host"
+
+max_user_namespaces: 55536
+...

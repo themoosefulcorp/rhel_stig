@@ -1,0 +1,139 @@
+---
+# Quick and dirty check, no remediation
+manage_230221: true
+
+manage_230222: true
+
+manage_230223: true
+
+# Quick and dirty check, no remediation
+manage_230224: true
+
+manage_230225: true
+
+manage_230226: true
+
+manage_230227: true
+
+manage_230228: true
+
+# Quick and dirty check, no remediation
+manage_230229: true
+
+manage_230231: true
+
+manage_230232: true
+
+manage_230233: true
+
+manage_230234: true
+
+manage_230235: true
+
+manage_230236: true
+
+manage_230237: true
+# Configured in authselect role; only here for completeness
+
+manage_230238: true
+
+manage_230239: true
+
+manage_230240: true
+
+manage_230241: true
+
+manage_230243: true
+
+manage_230244: true
+
+manage_230245: true
+
+manage_230246: true
+
+manage_230247: true
+
+manage_230248: true
+
+manage_230249: true
+
+manage_230250: true
+
+manage_230251: true
+
+manage_230252: true
+
+manage_230253: true
+
+manage_230254: true
+
+manage_230255: true
+
+manage_230256: true
+
+manage_230257: true
+
+manage_230258: true
+
+manage_230259: true
+
+manage_230260: true
+
+manage_230261: true
+
+manage_230262: true
+
+manage_230263: true
+
+manage_230264: true
+
+manage_230265: true
+
+manage_230266: true
+
+manage_230267: true
+
+manage_230268: true
+
+manage_230269: true
+
+manage_230270: true
+
+
+
+manage_230280: true
+
+
+
+manage_230311: true
+
+
+
+manage_230535: true
+manage_230536: true
+manage_230537: true
+manage_230538: true
+manage_230539: true
+manage_230540: true
+manage_230541: true
+manage_230542: true
+manage_230543: true
+manage_230544: true
+manage_230545: true
+manage_230546: true
+manage_230547: true
+manage_230548: true
+manage_230549: true
+
+
+
+manage_244550: true
+manage_244551: true
+manage_244552: true
+manage_244553: true
+manage_244554: true
+
+
+
+manage_250317: true
+...

@@ -1,0 +1,48 @@
+---
+- name: Update package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Check that role execution is supported
+  block:
+  - name: Collect minimum required subset of facts
+    ansible.builtin.setup:
+      gather_subset:
+        - '!all'
+        - distribution
+        - distribution_major_version
+    when:
+      - ansible_facts.distribution is not defined
+        or ansible_facts.distribution_major_version is not defined
+  - name: Assert that the role is running on RHEL 8
+    ansible.builtin.assert:
+      that:
+        - "ansible_facts.distribution == 'RedHat'"
+        - "ansible_facts.distribution_major_version == '8'"
+      fail_msg: "This role must be run on RHEL 8."
+
+- name: Include package installation and removal tasks
+  ansible.builtin.include_tasks:
+    file: packages.yml
+
+- name: Include openssh configuration tasks
+  ansible.builtin.include_tasks:
+    file: openssh.yml
+  when: "'openssh' in ansible_facts.packages"
+  tags: ssh
+
+- name: Include GDM configuration tasks
+  ansible.builtin.include_tasks:
+    file: gdm.yml
+  when: "'gdm' in ansible_facts.packages"
+  tags: gdm
+
+- name: Include common STIG implementation tasks
+  ansible.builtin.include_tasks:
+    file: common.yml
+
+- name: Include sysctl hardening tasks
+  ansible.builtin.include_tasks:
+    file: sysctl.yml
+  tags: sysctl
+...

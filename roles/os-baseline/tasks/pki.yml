@@ -1,0 +1,31 @@
+---
+- name: Install prerequisite packages for the community.crypto collection
+  ansible.builtin.package:
+    name: python3-cryptography
+    state: present
+
+# RHEL-08-010090
+- name: RHEL 8, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor
+  when: manage_230229 | bool
+  block:
+  - name: Check for existence of an SSSD trust anchor
+    ansible.builtin.stat:
+      path: /etc/sssd/pki/sssd_auth_ca_db.pem
+    register: __stat_sssd_pki_cert
+  - name: Get information from cert if it exists
+    community.crypto.x509_certificate_info:
+      path: /etc/sssd/pki/sssd_auth_ca_db.pem
+      valid_at:
+        # May as well be proactive
+        tomorrow: "+1d"
+    register: __info_sssd_pki_cert
+    when: __stat_sssd_pki_cert.stat.exists
+  - name: Assert that the trust anchor cert is valid
+    ansible.builtin.assert:
+      that:
+        - "'DoD Root CA' in __info_sssd_pki_cert.subject['commonName']"
+        - __info_sssd_pki_cert.valid_at.tomorrow | bool
+    when: __info_sssd_pki_cert is not skipped
+    ignore_errors: true
+
+...
